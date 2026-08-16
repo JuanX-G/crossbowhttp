@@ -1,0 +1,4 @@
+github.com/JuanX-G/crossbow v0.0.0-20260816000505-1db5b2190799 h1:4KHPliGjr5ytYsbIMm0tv6SkFiRL8WkR+qfvOdnnpP4=
+github.com/JuanX-G/crossbow v0.0.0-20260816000505-1db5b2190799/go.mod h1:NErrfArmkrwcE3mVIt1d8MnYVq4ay+BPF89kH9OtbJs=
+go.uber.org/goleak v1.3.0 h1:2K3zAYmnTNqV73imy9J1T3WC+gmCePx2hEGkimedGto=
+go.uber.org/goleak v1.3.0/go.mod h1:CoHD4mav9JJNrW/WLlf7HGZPjdw8EucARQHekz1X6bE=
