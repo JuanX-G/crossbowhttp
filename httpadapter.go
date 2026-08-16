@@ -17,6 +17,7 @@ type HttpAdapter[M any, O any] struct {
 	marshaller HttpMarshaller[M, O]
 }
 
+// called on transport/adapter layer errors (failing to decode a body, etc.). Writes headers and the response body
 func (h *HttpAdapter[M, O]) encodeError(w http.ResponseWriter, err error) {
 	res, code := h.marshaller.MapError(err)
 	if err != nil {
@@ -27,6 +28,7 @@ func (h *HttpAdapter[M, O]) encodeError(w http.ResponseWriter, err error) {
 	w.Write(res)
 }
 
+// Returns the http handler function for asynchronous sends to the server
 func (h *HttpAdapter[M, O]) HandleSend() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		req, err := h.marshaller.Decode(r)
@@ -39,6 +41,7 @@ func (h *HttpAdapter[M, O]) HandleSend() http.HandlerFunc {
 	}
 }
 
+// Returns the http handler function for synchronous calls to the server
 func (h *HttpAdapter[M, O]) HandleCall() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		req, err := h.marshaller.Decode(r)
@@ -59,14 +62,16 @@ func (h *HttpAdapter[M, O]) HandleCall() http.HandlerFunc {
 	}
 }
 
+// Params for HttpAdapter to http.ServeMux registration
 type RegisterHttpAdapterParams struct {
-	HealthEnc        HealthEncoder
-	urlBase          string
-	SendMiddleware   chain
-	CallMiddleware   chain
-	HealthMiddleware chain
+	HealthEnc        HealthEncoder // function that encoedes the server health to the desired output format
+	urlBase          string        // base url for handlers. The final url is: urlBase + "/[call | send | health]"
+	SendMiddleware   Chain         // middleware chain for the .../send endpoint
+	CallMiddleware   Chain         // middleware chain for the .../call endpoint
+	HealthMiddleware Chain         // middleware chain for the .../health endpoint
 }
 
+// Register a HttpAdapter to a http.ServeMux
 func RegisterHttpAdapter[M any, O any](mux *http.ServeMux, adapter HttpAdapter[M, O], params RegisterHttpAdapterParams) {
 	mux.Handle("POST "+params.urlBase+"/send", params.SendMiddleware.thenFunc(adapter.HandleSend()))
 	mux.Handle("POST "+params.urlBase+"/call", params.CallMiddleware.thenFunc(adapter.HandleCall()))

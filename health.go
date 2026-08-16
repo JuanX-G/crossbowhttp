@@ -6,14 +6,18 @@ import (
 	"github.com/JuanX-G/crossbow"
 )
 
+// Health metrics of a server aggregated into a single struct for encoding
 type ServerHealth struct {
 	Stats      crossbow.StatsSnapshot
 	MailboxLen int
 	Terminated bool
 }
 
+// function mapping health metrics of a server to a byte blob ready for streaming over http.
+// The second return is the http status code
 type HealthEncoder = func(ServerHealth) ([]byte, int)
 
+// returns the http handler for fetching the health metrics of the server.
 func (h *HttpAdapter[M, O]) HealthHandler(enc HealthEncoder) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		health := ServerHealth{}
